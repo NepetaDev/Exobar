@@ -3,11 +3,15 @@
 #import <Foundation/NSDistributedNotificationCenter.h>
 
 #import "Tweak.h"
+#import "../EXBTheme.h"
 
 HBPreferences *preferences;
-NSString *themeUrl = @"/Library/Exobar/default/theme.html";
+NSString *themeDirectory;
+EXBTheme *theme;
 
 bool enabled;
+NSMutableArray *viewsToRelayout = [NSMutableArray new];
+NSMutableArray *webViews = [NSMutableArray new];
 
 @implementation EXBWebView
 
@@ -30,10 +34,11 @@ bool enabled;
     %orig;
     if (!self.exbWebView) {
         self.exbWebView = [[EXBWebView alloc] initWithFrame:self.frame];
+        [webViews addObject:self.exbWebView];
         self.exbWebView.opaque = false;
         [self addSubview:self.exbWebView];
 
-        NSURL *nsUrl = [NSURL fileURLWithPath:themeUrl];
+        NSURL *nsUrl = [NSURL fileURLWithPath:[theme getPath:@"theme.html"]];
         NSURLRequest *request = [NSURLRequest requestWithURL:nsUrl];
         [self.exbWebView loadRequest:request];
     }
@@ -69,14 +74,21 @@ bool enabled;
 
 %property (nonatomic, retain) EXBWebView *exbWebView;
 
+-(id)initWithStyle:(long long)arg1 {
+    %orig;
+    [viewsToRelayout addObject:self.foregroundView];
+    return self;
+}
+
 -(void)layoutSubviews {
     %orig;
     if (!self.exbWebView) {
         self.exbWebView = [[EXBWebView alloc] initWithFrame:self.foregroundView.frame];
+        [webViews addObject:self.exbWebView];
         self.exbWebView.opaque = false;
         [self addSubview:self.exbWebView];
 
-        NSURL *nsUrl = [NSURL fileURLWithPath:themeUrl];
+        NSURL *nsUrl = [NSURL fileURLWithPath:[theme getPath:@"theme.html"]];
         NSURLRequest *request = [NSURLRequest requestWithURL:nsUrl];
         [self.exbWebView loadRequest:request];
     }
@@ -107,13 +119,22 @@ bool enabled;
 
 %hook UIStatusBarForegroundView
 
--(void)addSubview:(id)view {
-    if ([view isKindOfClass:%c(EXBWebView)]) {
-        %orig;
-    }
+-(id)initWithFrame:(CGRect)arg1 foregroundStyle:(id)arg2 usesVerticalLayout:(BOOL)arg3 {
+    %orig;
+    [viewsToRelayout addObject:self];
+    return self;
 }
 
--(void)insertSubview:(id)view atIndex:(int)x { }
+-(void)layoutSubviews {
+    %orig;
+    for (UIView *view in [self subviews]) {
+        if (![view isKindOfClass:%c(EXBWebView)]) {
+            view.hidden = enabled;
+        } else {
+            view.hidden = !enabled;
+        }
+    }
+}
 
 %end
 
@@ -123,7 +144,9 @@ bool enabled;
     %orig;
     for (UIView *view in [self subviews]) {
         if (![view isKindOfClass:%c(EXBWebView)]) {
-            view.hidden = YES;
+            view.hidden = enabled;
+        } else {
+            view.hidden = !enabled;
         }
     }
 }
@@ -132,6 +155,17 @@ bool enabled;
 
 %end
 
+void refreshAll() {
+    for (EXBWebView *view in webViews) {
+        [view reload];
+    }
+}
+
+void relayoutAll() {
+    for (UIView *view in viewsToRelayout) {
+        [view layoutSubviews];
+    }
+}
 
 %ctor {
     if (![NSProcessInfo processInfo]) return;
@@ -163,11 +197,19 @@ bool enabled;
     if (!shouldLoad) return;
 
     preferences = [[HBPreferences alloc] initWithIdentifier:@"me.nepeta.exobar"];
-    [preferences registerDefaults:@{
-        @"Enabled": @YES,
+    [preferences registerBool:&enabled default:YES forKey:@"Enabled"];
+    [preferences registerObject:&themeDirectory default:@"default" forKey:@"Theme"];
+    [preferences registerPreferenceChangeBlock:^() {
+        theme = [EXBTheme themeWithDirectoryName:themeDirectory];
+        relayoutAll();
+        for (EXBWebView *view in webViews) {
+            NSURL *nsUrl = [NSURL fileURLWithPath:[theme getPath:@"theme.html"]];
+            NSURLRequest *request = [NSURLRequest requestWithURL:nsUrl];
+            [view loadRequest:request];
+        }
     }];
 
-    [preferences registerBool:&enabled default:YES forKey:@"Enabled"];
+    CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)refreshAll, (CFStringRef)EXBRefreshNotification, NULL, (CFNotificationSuspensionBehavior)kNilOptions);
 
     %init(Exobar);
 }
