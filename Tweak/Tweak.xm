@@ -74,12 +74,6 @@ NSMutableArray *webViews = [NSMutableArray new];
 
 %property (nonatomic, retain) EXBWebView *exbWebView;
 
--(id)initWithStyle:(long long)arg1 {
-    %orig;
-    [viewsToRelayout addObject:self.foregroundView];
-    return self;
-}
-
 -(void)layoutSubviews {
     %orig;
     if (!self.exbWebView) {
@@ -155,6 +149,12 @@ NSMutableArray *webViews = [NSMutableArray new];
 %end
 
 %hook _UIStatusBarForegroundView
+
+-(id)initWithFrame:(CGRect)arg1 {
+    %orig;
+    [viewsToRelayout addObject:self];
+    return self;
+}
 
 -(void)layoutSubviews {
     %orig;
