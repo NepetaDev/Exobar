@@ -117,6 +117,14 @@ NSMutableArray *webViews = [NSMutableArray new];
 
 %end
 
+%hook UIStatusBarBackgroundView
+
+-(BOOL)hidden {
+    return YES;
+}
+
+%end
+
 %hook UIStatusBarForegroundView
 
 -(id)initWithFrame:(CGRect)arg1 foregroundStyle:(id)arg2 usesVerticalLayout:(BOOL)arg3 {
@@ -134,6 +142,14 @@ NSMutableArray *webViews = [NSMutableArray new];
             view.hidden = !enabled;
         }
     }
+}
+
+%end
+
+%hook _UIStatusBarBackgroundView
+
+-(BOOL)hidden {
+    return YES;
 }
 
 %end
