@@ -1,6 +1,7 @@
 {
   "ENABLED" = "Enabled";
   "RESPRING" = "Respring";
+  "REFRESH" = "Refresh";
   "ARE_YOU_SURE_TO_RESET_PREFS" = "Are you sure you want to reset all your preferences? This cannot be undone.";
   "OK" = "OK";
   "CANCEL" = "Cancel";

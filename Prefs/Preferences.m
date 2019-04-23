@@ -31,6 +31,10 @@
     self.navigationController.navigationController.navigationBar.translucent = YES;
 }
 
+- (void)refresh:(id)sender {
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (CFStringRef)EXBRefreshNotification, nil, nil, true);
+}
+
 - (void)resetPrefs:(id)sender {
     HBPreferences *prefs = [[HBPreferences alloc] initWithIdentifier:EXBPrefsIdentifier];
     [prefs removeAllObjects];

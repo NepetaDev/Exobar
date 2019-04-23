@@ -7,6 +7,7 @@
 #import "../EXBTheme.h"
 
 @interface EXBPrefsListController : HBRootListController
+    - (void)refresh:(id)sender;
     - (void)resetPrefs:(id)sender;
     - (void)respring:(id)sender;
     - (void)setThemeName:(NSString *)name;
