@@ -66,6 +66,19 @@ NSMutableArray *webViews = [NSMutableArray new];
     [self.exbWebView exoInternalUpdate:@{
         @"exobar.dark": @(dark)
     }];
+
+    UISystemNavigationAction *action = [[UIApplication sharedApplication] _systemNavigationAction];
+    if (action && [action destinations] && [[action destinations] count] > 0) {
+        [self.exbWebView exoInternalUpdate:@{
+            @"exobar.breadcrumb": @(true),
+            @"exobar.breadcrumb.title": [action titleForDestination:0] ?: @"",
+            @"exobar.breadcrumb.bundle": [action bundleIdForDestination:0] ?: @"",
+        }];
+    } else {
+        [self.exbWebView exoInternalUpdate:@{
+            @"exobar.breadcrumb": @(false)
+        }];
+    }
 }
 
 %end
@@ -107,6 +120,19 @@ NSMutableArray *webViews = [NSMutableArray new];
     [self.exbWebView exoInternalUpdate:@{
         @"exobar.cc": @(cc)
     }];
+
+    UISystemNavigationAction *action = [[UIApplication sharedApplication] _systemNavigationAction];
+    if (action && [action destinations] && [[action destinations] count] > 0) {
+        [self.exbWebView exoInternalUpdate:@{
+            @"exobar.breadcrumb": @(true),
+            @"exobar.breadcrumb.title": [action titleForDestination:0] ?: @"",
+            @"exobar.breadcrumb.bundle": [action bundleIdForDestination:0] ?: @"",
+        }];
+    } else {
+        [self.exbWebView exoInternalUpdate:@{
+            @"exobar.breadcrumb": @(false)
+        }];
+    }
 }
 
 %end

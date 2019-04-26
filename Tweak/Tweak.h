@@ -47,3 +47,27 @@
 @interface _UIStatusBarForegroundView : UIView
 
 @end
+
+@interface UISystemNavigationAction : NSObject
+
+@property (nonatomic,readonly) NSArray* destinations;           //@synthesize destinations=_destinations - In the implementation block
+-(long long)UIActionType;
+-(NSString *)titleForDestination:(unsigned long long)arg1 ;
+-(NSString *)URLForDestination:(unsigned long long)arg1 ;
+-(id)initWithInfo:(id)arg1 timeout:(double)arg2 forResponseOnQueue:(id)arg3 withHandler:(/*^block*/ id)arg4 ;
+-(id)keyDescriptionForSetting:(unsigned long long)arg1 ;
+-(id)valueDescriptionForFlag:(long long)arg1 object:(id)arg2 ofSetting:(unsigned long long)arg3 ;
+-(bool)sendResponseForDestination:(unsigned long long)arg1 ;
+-(id)initWithDestinationContexts:(id)arg1 forResponseOnQueue:(id)arg2 withHandler:(/*^block*/ id)arg3 ;
+-(id)_destinationContextForResponseDestination:(unsigned long long)arg1 ;
+-(id)destinations;
+-(NSString *)bundleIdForDestination:(unsigned long long)arg1 ;
+
+@end
+
+
+@interface UIApplication(Private)
+
+- (UISystemNavigationAction *)_systemNavigationAction;
+
+@end
