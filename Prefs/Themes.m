@@ -30,7 +30,7 @@
     [super layoutSubviews];
     UIView *accessoryView = [self _accessoryView:NO];
     accessoryView.frame = CGRectMake(self.frame.size.width - accessoryView.frame.size.width - 10.0,
-                                        self.frame.size.height - 10.0 - [self.textLabel _calculatedIntrinsicHeight]/2.0 - accessoryView.frame.size.height/2.0,
+                                        self.frame.size.height - 10.0 - [self.textLabel _calculatedIntrinsicHeight]/2.0 - [self.detailTextLabel _calculatedIntrinsicHeight]/2.0 - accessoryView.frame.size.height/2.0,
                                         accessoryView.frame.size.width, accessoryView.frame.size.height);
 }
 
@@ -44,20 +44,27 @@
         self.didUpdateConstraints = YES;
         self.contentView.translatesAutoresizingMaskIntoConstraints = NO;
         self.textLabel.translatesAutoresizingMaskIntoConstraints = NO;
+        self.detailTextLabel.translatesAutoresizingMaskIntoConstraints = NO;
         self.imageView.translatesAutoresizingMaskIntoConstraints = NO;
         self.imageView.contentMode = UIViewContentModeScaleAspectFit;
         
         [NSLayoutConstraint activateConstraints:@[
-            [self.imageView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor],
-            [self.imageView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor],
-            [self.imageView.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor]
+            [self.imageView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:5],
+            [self.imageView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:5],
+            [self.imageView.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-5]
         ]];
 
         [NSLayoutConstraint activateConstraints:@[
-            [self.textLabel.topAnchor constraintEqualToAnchor:self.imageView.bottomAnchor constant:10],
+            [self.textLabel.topAnchor constraintEqualToAnchor:self.imageView.bottomAnchor constant:5],
             [self.textLabel.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10],
             [self.textLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10],
-            [self.textLabel.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-10],
+        ]];
+
+        [NSLayoutConstraint activateConstraints:@[
+            [self.detailTextLabel.topAnchor constraintEqualToAnchor:self.textLabel.bottomAnchor],
+            [self.detailTextLabel.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10],
+            [self.detailTextLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10],
+            [self.detailTextLabel.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-10],
         ]];
 
         [NSLayoutConstraint activateConstraints:@[
@@ -77,7 +84,7 @@
     CGFloat imageHeight = 0;
 
     if (self.imageView.image) {
-        CGFloat ratio = self.frame.size.width/self.imageView.image.size.width;
+        CGFloat ratio = (self.frame.size.width - 10)/self.imageView.image.size.width;
         imageHeight = self.imageView.image.size.height * ratio;
     }
 
@@ -91,6 +98,7 @@
 }
 
 -(id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)identifier {
+    style = UITableViewCellStyleSubtitle;
     self = [super initWithStyle:style reuseIdentifier:identifier];
     self.didUpdateConstraints = NO;
     [self setNeedsUpdateConstraints];
@@ -193,9 +201,9 @@
     
     EXBTheme *theme = [self.currentThemes objectAtIndex:indexPath.row];
     cell.textLabel.text = theme.name;
+    cell.detailTextLabel.text = @"No additional information.";
     cell.layoutMargins = UIEdgeInsetsZero;
     [cell updateImage:[theme getPreviewImage:[self usesModernStatusBar]]];
-    //cell.imageView.highlightedImage = theme.image;
     cell.selected = NO;
 
     if ([theme.name isEqualToString: selectedTheme] && !tableView.isEditing) {
