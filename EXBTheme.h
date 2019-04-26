@@ -9,6 +9,8 @@
 
 @property (nonatomic, copy) NSString *name;
 @property (nonatomic, copy) NSString *path;
+@property (nonatomic, retain) NSDictionary *info;
+
 + (EXBTheme *)themeWithDirectoryName:(NSString *)name;
 + (EXBTheme *)themeWithPath:(NSString *)path;
 - (NSString *)getPath:(NSString *)filename;

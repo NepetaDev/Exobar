@@ -30,7 +30,7 @@
     [super layoutSubviews];
     UIView *accessoryView = [self _accessoryView:NO];
     accessoryView.frame = CGRectMake(self.frame.size.width - accessoryView.frame.size.width - 10.0,
-                                        self.frame.size.height - 10.0 - [self.textLabel _calculatedIntrinsicHeight]/2.0 - [self.detailTextLabel _calculatedIntrinsicHeight]/2.0 - accessoryView.frame.size.height/2.0,
+                                        self.frame.size.height - 5.0 - [self.textLabel _calculatedIntrinsicHeight]/2.0 - [self.detailTextLabel _calculatedIntrinsicHeight]/2.0 - accessoryView.frame.size.height/2.0,
                                         accessoryView.frame.size.width, accessoryView.frame.size.height);
 }
 
@@ -64,7 +64,7 @@
             [self.detailTextLabel.topAnchor constraintEqualToAnchor:self.textLabel.bottomAnchor],
             [self.detailTextLabel.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10],
             [self.detailTextLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10],
-            [self.detailTextLabel.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-10],
+            [self.detailTextLabel.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-5],
         ]];
 
         [NSLayoutConstraint activateConstraints:@[
@@ -173,6 +173,8 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [self refreshList];
+    [self setTitle:[self navigationTitle]];
+    [self.navigationItem setTitle:[self navigationTitle]];
 }
 
 - (NSArray *)currentThemes {
@@ -202,6 +204,21 @@
     EXBTheme *theme = [self.currentThemes objectAtIndex:indexPath.row];
     cell.textLabel.text = theme.name;
     cell.detailTextLabel.text = @"No additional information.";
+
+    if (theme.info) {
+        NSString *string = @"";
+        if (theme.info[@"author"]) {
+            string = [string stringByAppendingString:[NSString stringWithFormat:@"by %@ • ", theme.info[@"author"]]];
+        }
+
+        if (theme.info[@"version"]) {
+            string = [string stringByAppendingString:[NSString stringWithFormat:@"%@ • ", theme.info[@"version"]]];
+        }
+
+        string = [string substringToIndex: [string length] - 3];
+        cell.detailTextLabel.text = string;
+    }
+
     cell.layoutMargins = UIEdgeInsetsZero;
     [cell updateImage:[theme getPreviewImage:[self usesModernStatusBar]]];
     cell.selected = NO;

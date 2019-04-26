@@ -51,6 +51,7 @@
     if ((self = [super init])) {
         self.path = path;
         self.name = [[path lastPathComponent] stringByDeletingPathExtension];
+        self.info = [[NSDictionary alloc] initWithContentsOfFile:[self getPath:@"info.plist"]];
     }
     return self;
 }
