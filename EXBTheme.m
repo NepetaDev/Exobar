@@ -10,6 +10,32 @@
     return [[EXBTheme alloc] initWithPath:path];
 }
 
+- (UIImage *)getImage:(NSString *)filename {
+    return [UIImage imageWithContentsOfFile:[self getPath:filename]];
+}
+
+- (UIImage *)getPreviewImage:(BOOL)modern {
+    if (_previewImage) return _previewImage;
+
+    if (modern) {
+        _previewImage = [self getImage:@"preview_modern.png"];
+
+        if (!_previewImage) {
+            _previewImage = [self getImage:@"preview_modern.jpg"];
+        }
+    }
+
+    if (!_previewImage) {
+        _previewImage = [self getImage:@"preview.png"];
+    }
+
+    if (!_previewImage) {
+        _previewImage = [self getImage:@"preview.jpg"];
+    }
+
+    return _previewImage;
+}
+
 - (NSString *)getPath:(NSString *)filename {
     return [self.path stringByAppendingPathComponent:filename];
 }

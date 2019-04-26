@@ -1,40 +1,111 @@
 #import "Themes.h"
 #import "Preferences.h"
 
-@interface EXBAlignedTableViewCell : UITableViewCell {
-}
+@interface UITableViewCell(Private)
+
+-(UIView *)_accessoryView:(BOOL)x;
+
+@end
+
+@interface UILabel(Private)
+
+-(CGFloat)_calculatedIntrinsicHeight;
+
+@end
+
+@interface EXBAlignedTableViewCell : UITableViewCell
+
+@property (nonatomic, retain) NSLayoutConstraint *imageHeightConstraint;
+@property (nonatomic, assign) BOOL didUpdateConstraints;
+
+-(void)updateImage:(UIImage *)image;
+
 @end
 
 #define MARGIN 5
 
 @implementation EXBAlignedTableViewCell
-- (void) layoutSubviews {
+
+-(void)layoutSubviews {
     [super layoutSubviews];
-    CGRect cvf = self.contentView.frame;
-      CGFloat width = 80;
-    self.imageView.frame = CGRectMake(MARGIN,
-                                      0.0,
-                                      width,
-                                      cvf.size.height-1);
-    self.imageView.contentMode = UIViewContentModeScaleAspectFit;
-
-    CGRect frame = CGRectMake(width + MARGIN*2,
-                              self.textLabel.frame.origin.y,
-                              cvf.size.width - width - 3*MARGIN,
-                              self.textLabel.frame.size.height);
-    self.textLabel.frame = frame;
-
-    frame = CGRectMake(width + MARGIN*2,
-                       self.detailTextLabel.frame.origin.y,
-                       cvf.size.width - width - 3*MARGIN,
-                       self.detailTextLabel.frame.size.height);   
-    self.detailTextLabel.frame = frame;
+    UIView *accessoryView = [self _accessoryView:NO];
+    accessoryView.frame = CGRectMake(self.frame.size.width - accessoryView.frame.size.width - 10.0,
+                                        self.frame.size.height - 10.0 - [self.textLabel _calculatedIntrinsicHeight]/2.0 - accessoryView.frame.size.height/2.0,
+                                        accessoryView.frame.size.width, accessoryView.frame.size.height);
 }
+
+-(void)updateImage:(UIImage *)image {
+    self.imageView.image = image;
+    [self setNeedsLayout];
+}
+
+-(void)updateConstraints {
+    if (!self.didUpdateConstraints) {
+        self.didUpdateConstraints = YES;
+        self.contentView.translatesAutoresizingMaskIntoConstraints = NO;
+        self.textLabel.translatesAutoresizingMaskIntoConstraints = NO;
+        self.imageView.translatesAutoresizingMaskIntoConstraints = NO;
+        self.imageView.contentMode = UIViewContentModeScaleAspectFit;
+        
+        [NSLayoutConstraint activateConstraints:@[
+            [self.imageView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor],
+            [self.imageView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor],
+            [self.imageView.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor]
+        ]];
+
+        [NSLayoutConstraint activateConstraints:@[
+            [self.textLabel.topAnchor constraintEqualToAnchor:self.imageView.bottomAnchor constant:10],
+            [self.textLabel.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10],
+            [self.textLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10],
+            [self.textLabel.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-10],
+        ]];
+
+        [NSLayoutConstraint activateConstraints:@[
+            [self.contentView.topAnchor constraintEqualToAnchor:self.topAnchor],
+            [self.contentView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+            [self.contentView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+            [self.contentView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+        ]];
+    }
+    
+    if (self.imageHeightConstraint) {
+        [NSLayoutConstraint deactivateConstraints:@[
+            self.imageHeightConstraint
+        ]];
+    }
+
+    CGFloat imageHeight = 0;
+
+    if (self.imageView.image) {
+        CGFloat ratio = self.frame.size.width/self.imageView.image.size.width;
+        imageHeight = self.imageView.image.size.height * ratio;
+    }
+
+    self.imageHeightConstraint = [self.imageView.heightAnchor constraintEqualToConstant:imageHeight];
+
+    [NSLayoutConstraint activateConstraints:@[
+        self.imageHeightConstraint
+    ]];
+
+    [super updateConstraints];
+}
+
+-(id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)identifier {
+    self = [super initWithStyle:style reuseIdentifier:identifier];
+    self.didUpdateConstraints = NO;
+    [self setNeedsUpdateConstraints];
+    return self;
+}
+
 @end
 
 @implementation EXBThemesListController
 
 @synthesize themes = _themes;
+
+- (BOOL)usesModernStatusBar {
+    return [UIApplication sharedApplication].statusBarFrame.size.height > 40.0;
+}
 
 - (id)initForContentSize:(CGSize)size {
     self = [super init];
@@ -47,7 +118,13 @@
         [_tableView setEditing:NO];
         [_tableView setAllowsSelection:YES];
         [_tableView setAllowsMultipleSelection:NO];
-        
+        [_tableView registerClass:[EXBAlignedTableViewCell class] forCellReuseIdentifier:@"cell"];
+        _tableView.estimatedRowHeight = 100;
+        _tableView.rowHeight = UITableViewAutomaticDimension;
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _tableView.layoutMargins = UIEdgeInsetsZero;
+        _tableView.separatorInset = UIEdgeInsetsZero;
+
         if ([self respondsToSelector:@selector(setView:)])
             [self performSelectorOnMainThread:@selector(setView:) withObject:_tableView waitUntilDone:YES];        
     }
@@ -112,14 +189,12 @@
 }
 
 - (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ThemeCell"];
-    if (!cell) {
-        cell = [[EXBAlignedTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"ThemeCell"];
-    }
+    EXBAlignedTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
     
     EXBTheme *theme = [self.currentThemes objectAtIndex:indexPath.row];
-    cell.textLabel.text = theme.name;    
-    //cell.imageView.image = theme.image;
+    cell.textLabel.text = theme.name;
+    cell.layoutMargins = UIEdgeInsetsZero;
+    [cell updateImage:[theme getPreviewImage:[self usesModernStatusBar]]];
     //cell.imageView.highlightedImage = theme.image;
     cell.selected = NO;
 

@@ -12,5 +12,6 @@
 }
 
 @property (nonatomic, retain) NSMutableArray *themes;
+- (BOOL)usesModernStatusBar;
 
 @end
