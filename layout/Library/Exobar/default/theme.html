@@ -37,13 +37,12 @@
     </style>
 </head>
 <body>
-    <div class="grow" id="test">{mobile.network}</div>
-    <div class="bg-focus">{exobar.dark} {exobar.cc} (d)</div>
+    <div class="grow" id="test">{time} {mobile.network}</div>
     <div class="bg-focus">{battery.percentage}%</div>
-    <!-- <div class="grow" @class.show="media.playing">{media.artist} - {media.title}</div> -->
     <script>
         var _ = window.exo;
-        _.log("test");
+        // _ is your Exo object, enjoy.
+        // https://docs.nepeta.me/exo
     </script>
 </body>
 </html>

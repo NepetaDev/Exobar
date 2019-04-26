@@ -57,13 +57,13 @@
         [NSLayoutConstraint activateConstraints:@[
             [self.textLabel.topAnchor constraintEqualToAnchor:self.imageView.bottomAnchor constant:5],
             [self.textLabel.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10],
-            [self.textLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10],
+            [self.textLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-30],
         ]];
 
         [NSLayoutConstraint activateConstraints:@[
             [self.detailTextLabel.topAnchor constraintEqualToAnchor:self.textLabel.bottomAnchor],
             [self.detailTextLabel.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:10],
-            [self.detailTextLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-10],
+            [self.detailTextLabel.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-30],
             [self.detailTextLabel.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-5],
         ]];
 
@@ -215,8 +215,17 @@
             string = [string stringByAppendingString:[NSString stringWithFormat:@"%@ • ", theme.info[@"version"]]];
         }
 
-        string = [string substringToIndex: [string length] - 3];
+        if ([string length] > 3) string = [string substringToIndex: [string length] - 3];
+
+        if (theme.info[@"description"]) {
+            if ([string length] > 0) string = [string stringByAppendingString:@"\n"];
+            string = [string stringByAppendingString:theme.info[@"description"]];
+        }
+
         cell.detailTextLabel.text = string;
+        cell.detailTextLabel.numberOfLines = 0;
+        cell.detailTextLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        [cell.detailTextLabel setPreferredMaxLayoutWidth:tableView.frame.size.width - 40.0];
     }
 
     cell.layoutMargins = UIEdgeInsetsZero;
