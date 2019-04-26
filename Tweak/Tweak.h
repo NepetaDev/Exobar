@@ -10,15 +10,30 @@
 
 @end
 
+@interface UIStatusBarStyleAttributes : NSObject
+
+-(UIStatusBarForegroundStyleAttributes *)foregroundStyle;
+
+@end
+
 @interface UIStatusBar : UIView
 
 @property (nonatomic, retain) EXBWebView *exbWebView;
 @property (nonatomic, retain) UIColor *foregroundColor;
 
+-(id)_currentStyleAttributes;
+
+@end
+
+@interface _UIStatusBarStyleAttributes : NSObject
+
+-(UIColor *)textColor;
+
 @end
 
 @interface _UIStatusBar : UIView
 
+@property (nonatomic,retain) _UIStatusBarStyleAttributes * styleAttributes;
 @property (nonatomic, retain) EXBWebView *exbWebView;
 @property (nonatomic, retain) UIView *foregroundView;
 @property (nonatomic, retain) UIColor *foregroundColor;

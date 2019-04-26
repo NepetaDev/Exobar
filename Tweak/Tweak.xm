@@ -57,9 +57,9 @@ NSMutableArray *webViews = [NSMutableArray new];
 
     bool dark = false;
 
-    if (self.foregroundColor) {
+    if ([self _currentStyleAttributes] && [[self _currentStyleAttributes] foregroundStyle]) {
         CGFloat white = 0;
-        [self.foregroundColor getWhite:&white alpha:nil];
+        [[[[self _currentStyleAttributes] foregroundStyle] tintColor] getWhite:&white alpha:nil];
         dark = (white < 0.5);
     }
 
@@ -92,9 +92,9 @@ NSMutableArray *webViews = [NSMutableArray new];
 
     bool dark = false;
 
-    if (self.foregroundColor) {
+    if ([self styleAttributes]) {
         CGFloat white = 0;
-        [self.foregroundColor getWhite:&white alpha:nil];
+        [[[self styleAttributes] textColor] getWhite:&white alpha:nil];
         dark = (white < 0.5);
     }
 
