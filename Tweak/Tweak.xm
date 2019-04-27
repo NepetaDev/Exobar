@@ -10,10 +10,21 @@ NSString *themeDirectory;
 EXBTheme *theme;
 
 bool enabled;
+bool disableBurnInProtection;
 NSMutableArray *viewsToRelayout = [NSMutableArray new];
 NSMutableArray *webViews = [NSMutableArray new];
 
 @implementation EXBWebView
+
+-(id)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+
+    NSString *content = [NSString stringWithContentsOfFile:@"/Library/Exobar/exobar.js" encoding:NSUTF8StringEncoding error:NULL];
+    self.exbUserScript = [[WKUserScript alloc] initWithSource:content injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+    [self.exoContentController addUserScript:self.exbUserScript];
+
+    return self;
+}
 
 -(void)exoAction:(NSString *)action withArguments:(NSDictionary *)arguments {
     [super exoAction:action withArguments:arguments];
@@ -52,6 +63,7 @@ NSMutableArray *webViews = [NSMutableArray new];
 
     [self.exbWebView exoInternalUpdate:@{
         @"exobar.cc": @(false),
+        @"exobar.disableBurnInProtection": @(disableBurnInProtection),
         @"exobar.modern": @(false)
     }];
 
@@ -113,6 +125,7 @@ NSMutableArray *webViews = [NSMutableArray new];
 
     [self.exbWebView exoInternalUpdate:@{
         @"exobar.dark": @(dark),
+        @"exobar.disableBurnInProtection": @(disableBurnInProtection),
         @"exobar.modern": @(true)
     }];
 
@@ -240,6 +253,7 @@ void relayoutAll() {
 
     preferences = [[HBPreferences alloc] initWithIdentifier:@"me.nepeta.exobar"];
     [preferences registerBool:&enabled default:YES forKey:@"Enabled"];
+    [preferences registerBool:&disableBurnInProtection default:NO forKey:@"DisableBurnInProtection"];
     [preferences registerObject:&themeDirectory default:@"default" forKey:@"Theme"];
     [preferences registerPreferenceChangeBlock:^() {
         theme = [EXBTheme themeWithDirectoryName:themeDirectory];

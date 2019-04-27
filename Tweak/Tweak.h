@@ -2,6 +2,8 @@
 
 @interface EXBWebView : EXOWebView
 
+@property (nonatomic, retain) WKUserScript *exbUserScript;
+
 @end
 
 @interface UIStatusBarForegroundStyleAttributes
