@@ -145,8 +145,7 @@
     NSArray *diskThemes = [manager contentsOfDirectoryAtPath:directory error:nil];
     
     for (NSString *dirName in diskThemes) {
-        NSString *path = [EXBThemesDirectory stringByAppendingPathComponent:dirName];
-        EXBTheme *theme = [EXBTheme themeWithPath:path];
+        EXBTheme *theme = [EXBTheme themeWithDirectoryName:dirName];
         
         if (theme) {
             //[theme preparePreviewImage];

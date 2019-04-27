@@ -41,6 +41,12 @@ NSMutableArray *webViews = [NSMutableArray new];
 
 %property (nonatomic, retain) EXBWebView *exbWebView;
 
+-(id)_initWithFrame:(CGRect)arg1 showForegroundView:(BOOL)arg2 inProcessStateProvider:(id)arg3 {
+    %orig;
+    [viewsToRelayout addObject:self];
+    return self;
+}
+
 -(void)layoutSubviews {
     %orig;
     if (!self.exbWebView) {
@@ -91,6 +97,18 @@ NSMutableArray *webViews = [NSMutableArray new];
             @"exobar.breadcrumb": @(false)
         }];
     }
+
+    if (theme.info && theme.info[@"settings"]) {
+        NSMutableDictionary *settings = [NSMutableDictionary new];
+        NSString *prefix = [NSString stringWithFormat:@"TS%@", theme.name];
+        for (NSString *key in [preferences.dictionaryRepresentation allKeys]) {
+            if ([key hasPrefix:prefix]) {
+                settings[[key stringByReplacingOccurrencesOfString:prefix withString:@"exobar.theme."]] = preferences.dictionaryRepresentation[key];
+            }
+        }
+
+        [self.exbWebView exoInternalUpdate:settings];
+    }
 }
 
 %end
@@ -98,6 +116,12 @@ NSMutableArray *webViews = [NSMutableArray new];
 %hook _UIStatusBar
 
 %property (nonatomic, retain) EXBWebView *exbWebView;
+
+-(id)initWithStyle:(long long)arg1 {
+    %orig;
+    [viewsToRelayout addObject:self];
+    return self;
+}
 
 -(void)layoutSubviews {
     %orig;
@@ -145,6 +169,18 @@ NSMutableArray *webViews = [NSMutableArray new];
         [self.exbWebView exoInternalUpdate:@{
             @"exobar.breadcrumb": @(false)
         }];
+    }
+
+    if (theme.info && theme.info[@"settings"]) {
+        NSMutableDictionary *settings = [NSMutableDictionary new];
+        NSString *prefix = [NSString stringWithFormat:@"TS%@", theme.name];
+        for (NSString *key in [preferences.dictionaryRepresentation allKeys]) {
+            if ([key hasPrefix:prefix]) {
+                settings[[key stringByReplacingOccurrencesOfString:prefix withString:@"exobar.theme."]] = preferences.dictionaryRepresentation[key];
+            }
+        }
+
+        [self.exbWebView exoInternalUpdate:settings];
     }
 }
 
@@ -251,7 +287,7 @@ void relayoutAll() {
 
     if (!shouldLoad) return;
 
-    preferences = [[HBPreferences alloc] initWithIdentifier:@"me.nepeta.exobar"];
+    preferences = [[HBPreferences alloc] initWithIdentifier:EXBPrefsIdentifier];
     [preferences registerBool:&enabled default:YES forKey:@"Enabled"];
     [preferences registerBool:&disableBurnInProtection default:NO forKey:@"DisableBurnInProtection"];
     [preferences registerObject:&themeDirectory default:@"default" forKey:@"Theme"];
