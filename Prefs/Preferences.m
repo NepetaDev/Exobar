@@ -49,6 +49,12 @@
     if (!theme || !theme.info || !theme.info[@"settings"] || ![theme.info[@"settings"] isKindOfClass:[NSArray class]]) return;
 
     NSArray *settings = theme.info[@"settings"];
+    if ([settings count] == 0) return;
+
+    PSSpecifier *themeSettingsSpecifier = [self specifierForID:@"themeSettings"];
+    [themeSettingsSpecifier setProperty:@"" forKey:@"footerText"];
+    [self reloadSpecifier:themeSettingsSpecifier];
+
     for (NSDictionary *setting in settings) {
         if (!setting[@"label"] || !setting[@"cell"] || ![self.cellTypes objectForKey:setting[@"cell"]]) continue;
         PSSpecifier *specifier = [PSSpecifier preferenceSpecifierNamed:setting[@"label"] target:self set:@selector(setPreferenceValue:specifier:) get:@selector(readPreferenceValue:) detail:nil cell:[_cellTypes[setting[@"cell"]] longValue] edit:nil];
